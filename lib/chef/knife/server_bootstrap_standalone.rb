@@ -59,7 +59,12 @@ class Chef
         bootstrap.name_args = [ config[:host] ]
         [ :chef_node_name, :ssh_user, :ssh_password, :ssh_port, :identity_file
         ].each { |attr| bootstrap.config[attr] = config[attr] }
-        bootstrap.config[:distro] = bootstrap_distro
+
+        if config[:template_file]
+          bootstrap.config[:template_file] = config[:template_file]
+        else
+          bootstrap.config[:distro] = bootstrap_distro
+        end
         bootstrap.config[:use_sudo] = true unless config[:ssh_user] == "root"
         bootstrap
       end
