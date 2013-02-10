@@ -65,7 +65,7 @@ set_hostname_for_debian() {
 
 install_omnibus_chef() {
   apt-get install -y curl bash
-  curl -L https://www.opscode.com/chef/install.sh | bash
+  curl -L https://www.opscode.com/chef/install.sh | bash -s -- -v <%= chef_version %>
 }
 
 download_cookbook() {

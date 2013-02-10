@@ -4,7 +4,6 @@ bash -c '
 export hostname="<%= @config[:chef_node_name] %>"
 export webui_password="<%= ENV['WEBUI_PASSWORD'] %>"
 export amqp_password="<%= ENV['AMQP_PASSWORD'] %>"
-export chef_version="<%= Chef::VERSION %>"
 
 set -e
 
@@ -67,7 +66,7 @@ set_hostname_for_enterpriseenterprise() {
 
 install_omnibus_chef() {
   yum install -y curl bash
-  curl -L https://www.opscode.com/chef/install.sh | bash -s -- -v "${chef_version}"
+  curl -L https://www.opscode.com/chef/install.sh | bash -s -- -v "<%= chef_version %>"
 }
 
 download_cookbook() {

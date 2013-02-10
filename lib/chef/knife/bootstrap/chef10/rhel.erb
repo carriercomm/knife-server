@@ -4,7 +4,6 @@ bash -c '
 export hostname="<%= @config[:chef_node_name] %>"
 export webui_password="<%= ENV['WEBUI_PASSWORD'] %>"
 export amqp_password="<%= ENV['AMQP_PASSWORD'] %>"
-export chef_version="<%= Chef::VERSION %>"
 
 set -e
 
@@ -112,7 +111,7 @@ install_chef_server() {
   gem install net-ssh -v 2.2.2 --no-ri --no-rdoc
   gem install net-ssh-gateway -v 1.1.0 --no-ri --no-rdoc
   gem install net-ssh-multi -v 1.1.0 --no-ri --no-rdoc
-  gem install chef -v $chef_version --no-ri --no-rdoc 
+  gem install chef -v "<%= chef_version %>" --no-ri --no-rdoc 
 
   local tmp_solo=/tmp/chef-solo
 
