@@ -51,7 +51,7 @@ set_hostname_for_ubuntu() {
 
 set_hostname_for_debian() {
   if hostname --fqdn | grep -q "^${hostname}$" || hostname --short | grep -q "^${hostname}$" ; then
-    printf "Hostname is correct, so skipping...\n"
+    echo "Hostname is correct, so skipping..."
     return
   fi
 

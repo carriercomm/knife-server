@@ -28,7 +28,7 @@ setup() {
 
 set_hostname_for_platform() {
   if hostname | grep -q "$hostname" > /dev/null ; then
-    printf -- "-----> Hostname is correct, so skipping...\n"
+    echo "-----> Hostname is correct, so skipping..."
     return
   fi
 
