@@ -35,11 +35,17 @@ class Chef
             :long => "--node-name NAME",
             :description => "The name of your new Chef Server"
 
+          option :chef_server_version,
+            :short => "-C VERSION",
+            :long => "--chef-server-version VERSION",
+            :description => "The version of chef you wish to use for the server",
+            :default => "10"
+
           option :platform,
             :short => "-P PLATFORM",
             :long => "--platform PLATFORM",
             :description => "The platform type that will be bootstrapped (debian)",
-            :default => "debian"
+            :default => "auto"
 
           option :ssh_user,
             :short => "-x USERNAME",
@@ -106,13 +112,63 @@ class Chef
         ui.msg(credentials_client.create_root_client)
       end
 
+      def bootstrap_auto?
+        config[:platform] == "auto"
+      end
+
+      def distro_auto_map(platform, platform_version)
+        # NOTE this logic is shared with chef/knife/bootstrap/auto.sh, which is
+        #      run on the server side.
+        # XXX we don't actually use the platform_version stuff, just included
+        #     because we get it for free in the script and it might prove
+        #     useful later.
+        # XXX might be better to have chef/ohai's platform_family? do this for
+        #     us in the long term.
+
+        normal = case platform
+                 when "debian", "ubuntu"
+                   "debian"
+                 when "el", "redhat"
+                   "rhel"
+                 when /^solaris/
+                   "solaris"
+                 when "sles", "suse"
+                   "suse"
+                 end
+
+        return construct_distro(normal)
+      end
+
+      def construct_distro(platform)
+        "chef#{config[:chef_server_version]}/#{platform}"
+      end
+
       def bootstrap_distro
-        config[:distro] || "chef-server-#{config[:platform]}"
+        return config[:distro] if config[:distro]
+        return determine_platform if config[:platform] == "auto"
+        return construct_distro(config[:platform])
       end
 
       def credentials_client
+        opts = { :omnibus => config[:chef_server_version] > '10' }
         @credentials_client ||= ::Knife::Server::Credentials.new(
-          ssh_connection, Chef::Config[:validation_key])
+          ssh_connection, Chef::Config[:validation_key], opts)
+      end
+
+      def determine_platform
+        return nil unless bootstrap_auto?
+
+        script = File.binread(File.expand_path("bootstrap/auto.sh", File.dirname(__FILE__)))
+
+        # result is expected to be two lines, first being the platform name,
+        # second being the platform version.
+        result, exit_status = ssh_connection.run_script(script)
+
+        if exit_status != 0 or !result or result.strip.empty?
+          raise "Could not determine the OS running the target for the chef server. Please specify --platform."
+        end
+
+        return distro_auto_map(*result.split(/\n/).compact[0..1])
       end
     end
   end
