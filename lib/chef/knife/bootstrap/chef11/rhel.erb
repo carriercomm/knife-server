@@ -116,8 +116,6 @@ cleanup() {
   for bin in chef-client chef-solo chef-shell knife ohai shef ; do
     ln -snf /opt/chef-server/bin/$bin /usr/bin/$bin
   done ; unset bin
-
-  rm -rf /opt/chef
 }
 
 configure_firewall() {
