@@ -113,7 +113,7 @@ run_chef_solo() {
 }
 
 cleanup() {
-  for bin in chef-client chef-solo chef-shell knife ohai shef ; do
+  for bin in chef-server-ctl wait-for-rabbit ; do
     ln -snf /opt/chef-server/bin/$bin /usr/bin/$bin
   done ; unset bin
 }
