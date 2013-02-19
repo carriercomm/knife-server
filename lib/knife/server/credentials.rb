@@ -25,7 +25,7 @@ module Knife
         @ssh = ssh
         @validation_key_path = validation_key_path
         @omnibus = options[:omnibus]
-        @user_password = options[:user_password]
+        @webui_password = options[:webui_password] || "chefchef"
       end
 
       def install_validation_key(suffix = Time.now.to_i)
@@ -56,6 +56,7 @@ module Knife
           "knife configure",
           "--server-url http://127.0.0.1:8000",
           "--user admin",
+          "--key /etc/chef-server/admin.pem",
           '--repository ""',
           "--admin-client-name admin",
           "--admin-client-key /etc/chef-server/admin.pem",
@@ -106,12 +107,13 @@ module Knife
           "--server-url http://127.0.0.1:8000",
           "--user admin",
           "--key /etc/chef-server/admin.pem",
-          "--password #{@user_password}",
+          "--password #{@webui_password}",
           "--admin",
           "--file /tmp/chef-client-#{user}.pem",
           "--disable-editing"
         ].join(" ")
 
+        Chef::Log.info omnibus_cmd
         @ssh.exec!(omnibus? ? omnibus_cmd : chef10_cmd)
       end
     end

@@ -95,9 +95,6 @@ class Chef
             :description => "Initial password for AMQP, default is 'chefchef'",
             :default => "chefchef"
 
-          option :user_password,
-            :long => "--user-password PASSWORD",
-            :description => "The API user password"
         end
       end
 
@@ -156,7 +153,7 @@ class Chef
       def credentials_client
         opts = { 
           :omnibus => config[:chef_server_version] > '10',
-          :user_password => config[:user_password]
+          :webui_password => config[:webui_password]
         }
         @credentials_client ||= ::Knife::Server::Credentials.new(
         ssh_connection, Chef::Config[:validation_key], opts)
