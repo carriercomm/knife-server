@@ -94,6 +94,10 @@ class Chef
             :long => "--amqp-password SECRET",
             :description => "Initial password for AMQP, default is 'chefchef'",
             :default => "chefchef"
+
+          option :user_password,
+            :long => "--user-password PASSWORD",
+            :description => "The API user password"
         end
       end
 
@@ -105,7 +109,7 @@ class Chef
 
       def install_client_key
         credentials_client.install_client_key(
-          Chef::Config[:node_name], Chef::Config[:client_key])
+        Chef::Config[:node_name], Chef::Config[:client_key])
       end
 
       def create_root_client
@@ -126,15 +130,15 @@ class Chef
         #     us in the long term.
 
         normal = case platform
-                 when "debian", "ubuntu"
-                   "debian"
-                 when "el", "redhat"
-                   "rhel"
-                 when /^solaris/
-                   "solaris"
-                 when "sles", "suse"
-                   "suse"
-                 end
+        when "debian", "ubuntu"
+          "debian"
+        when "el", "redhat"
+          "rhel"
+        when /^solaris/
+          "solaris"
+        when "sles", "suse"
+          "suse"
+        end
 
         return construct_distro(normal)
       end
@@ -150,9 +154,12 @@ class Chef
       end
 
       def credentials_client
-        opts = { :omnibus => config[:chef_server_version] > '10' }
+        opts = { 
+          :omnibus => config[:chef_server_version] > '10',
+          :user_password => config[:user_password]
+        }
         @credentials_client ||= ::Knife::Server::Credentials.new(
-          ssh_connection, Chef::Config[:validation_key], opts)
+        ssh_connection, Chef::Config[:validation_key], opts)
       end
 
       def determine_platform
