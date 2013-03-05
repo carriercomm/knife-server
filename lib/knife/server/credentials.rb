@@ -77,7 +77,7 @@ module Knife
         end
 
         File.open(client_key_path, "wb") do |f|
-          f.write(@ssh.exec!(omnibus? "cat /tmp/chef-client-#{user}.pem" : "cat /etc/chef-server/admin.pem"))
+          f.write(@ssh.exec!(omnibus? ? "cat /tmp/chef-client-#{user}.pem" : "cat /etc/chef-server/admin.pem"))
         end
 
         @ssh.exec!("rm -f /tmp/chef-client-#{user}.pem")
