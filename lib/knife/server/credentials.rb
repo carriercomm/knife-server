@@ -77,7 +77,7 @@ module Knife
         end
 
         File.open(client_key_path, "wb") do |f|
-          f.write(@ssh.exec!("cat /tmp/chef-client-#{user}.pem"))
+          f.write(@ssh.exec!(omnibus? "cat /tmp/chef-client-#{user}.pem" : "cat /etc/chef-server/admin.pem"))
         end
 
         @ssh.exec!("rm -f /tmp/chef-client-#{user}.pem")
@@ -101,20 +101,7 @@ module Knife
           "--admin --file /tmp/chef-client-#{user}.pem --disable-editing"
         ].join(" ")
 
-        omnibus_cmd = [
-          "knife user create",
-          user,
-          "--server-url http://127.0.0.1:8000",
-          "--user admin",
-          "--key /etc/chef-server/admin.pem",
-          "--password #{@webui_password}",
-          "--admin",
-          "--file /tmp/chef-client-#{user}.pem",
-          "--disable-editing"
-        ].join(" ")
-
-        Chef::Log.info omnibus_cmd
-        @ssh.exec!(omnibus? ? omnibus_cmd : chef10_cmd)
+        @ssh.exec!(omnibus? ? omnibus_cmd : "exit 0")
       end
     end
   end
