@@ -77,7 +77,7 @@ module Knife
         end
 
         File.open(client_key_path, "wb") do |f|
-          f.write(@ssh.exec!(omnibus? ? "cat /tmp/chef-client-#{user}.pem" : "cat /etc/chef-server/admin.pem"))
+          f.write(@ssh.exec!(omnibus? ? "cat /etc/chef-server/admin.pem" : "cat /tmp/chef-client-#{user}.pem"))
         end
 
         @ssh.exec!("rm -f /tmp/chef-client-#{user}.pem")
@@ -101,7 +101,7 @@ module Knife
           "--admin --file /tmp/chef-client-#{user}.pem --disable-editing"
         ].join(" ")
 
-        @ssh.exec!(omnibus? ? omnibus_cmd : "exit 0")
+        @ssh.exec!(omnibus? ? "exit 0" : chef10_cmd)
       end
     end
   end
