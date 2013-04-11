@@ -29,7 +29,12 @@ module Knife
 
         @host = options.delete(:host)
         @user = options.delete(:user)
+        @ui = options.delete(:ui)
         @options = options
+      end
+
+      def fixup_sudo(command)
+        command.sub(/^sudo/, 'sudo -p \'knife sudo password: \'')
       end
 
       def exec!(cmd)
@@ -42,11 +47,33 @@ module Knife
           ].join(" ")
         end
 
+        exit_status = 0
         result = ""
+
+        command = fixup_sudo(full_cmd)
         Net::SSH.start(@host, @user, @options) do |ssh|
-          result = ssh.exec!(full_cmd)
+          ssh.open_channel do |ch|
+            ch.request_pty
+            # ch.on_open_failed do |ch, code, desc|
+            #   raise "Connection error to #{@host}: #{desc}"
+            # end
+            ch.exec(command) do |ch, success|
+              ch.on_data do |ichannel, data|
+                @ui.msg(data)
+                if data =~ /^knife sudo password: /
+                  ichannel.send_data("#{@options[:password]}\n")
+                end
+                result << data
+              end
+
+              ch.on_request "exit-status" do |ichannel, data|
+                exit_status = [exit_status, data.read_long].max
+              end
+            end
+          end
+          ssh.loop
         end
-        result
+        return result
       end
 
       # runs a script on the target host by passing it to the stdin of a sh
@@ -62,13 +89,13 @@ module Knife
         if [ -e /dev/fd/0 ]
         then
           #{user_switch} /bin/sh /dev/fd/0
-        elif [ -e /dev/stdin ]
+          elif [ -e /dev/stdin ]
         then
           #{user_switch} /bin/sh /dev/stdin
         else
           echo "Cannot find method of communicating with the shell via stdin"
           exit 1
-        fi
+          fi
         EOF
 
         result = ""

@@ -95,7 +95,8 @@ class Chef
           :user => config_val(:ssh_user),
           :password => config_val(:ssh_password),
           :port => config_val(:ssh_port),
-          :keys => [config_val(:identity_file)].compact
+          :keys => [config_val(:identity_file)].compact,
+          :ui => ui
         }
         if config_val(:host_key_verify) == false
           opts[:user_known_hosts_file] = "/dev/null"
